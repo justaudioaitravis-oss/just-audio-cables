@@ -8,8 +8,6 @@ const PATHS = {
   yUp: ['M6 4l6 7l6 -7', 'M12 11v9'],
   // inverted Y: stem at the top splitting into two arms at the bottom
   yDown: ['M12 4v9', 'M6 20l6 -7l6 7'],
-  // branch: from the toggle above, down then left into the second dropdown
-  branch: ['M15 2v9a4 4 0 0 1 -4 4h-7'],
   whatsapp: [
     'M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9',
     'M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1',

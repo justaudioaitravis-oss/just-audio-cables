@@ -61,7 +61,7 @@ export function createBuild(app: App): BuildView {
       { type: 'button', 'aria-label': key === 'endA' ? 'Split End A (Y)' : 'Split End B (Y)', 'aria-pressed': 'false', 'data-testid': `y-${key}` },
       icon(key === 'endA' ? 'yUp' : 'yDown', 24, 1.75),
     );
-    const secondRow = h('div.ctrl-row.second', { hidden: true }, second, h('span.branch', { 'aria-hidden': 'true' }, icon('branch', 22, 1.5)));
+    const secondRow = h('div.ctrl-row.second', { hidden: true }, second, h('span.branch', { 'aria-hidden': 'true' }));
     const wrap = h(
       'div.field',
       {},

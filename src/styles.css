@@ -320,11 +320,22 @@ ul {
 
 .branch {
   flex: none;
+  position: relative;
   width: 52px;
   height: 46px;
-  display: grid;
-  place-items: center;
-  color: var(--dashed);
+}
+
+/* A corner line from under the Y toggle down and into the second dropdown. */
+.branch::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  right: 50%;
+  top: -8px;
+  height: calc(50% + 8px);
+  border-right: 1.5px solid var(--navy);
+  border-bottom: 1.5px solid var(--navy);
+  border-bottom-right-radius: 10px;
 }
 
 .custom {
