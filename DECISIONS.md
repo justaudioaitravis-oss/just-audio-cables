@@ -35,3 +35,12 @@ One line each: decision — why.
 - Viewport uses `maximum-scale=1` — stops iPhone Safari zooming in when a 15 px input is focused.
 - The Sent screen header shows just the logo (no back arrow) — the flow ends there; the phone's back button still returns to the Order summary.
 - "Send again" / "Copy message" appear on the Sent screen if the app is still in the foreground 2 s after Approve (i.e. WhatsApp apparently didn't open).
+- Lighthouse accessibility is 93 rather than 100 only because of `maximum-scale=1` (see above) — kept deliberately; everything else (contrast, labels, names) passes. Performance 100, CLS 0.
+- New app versions install themselves (`registerType: autoUpdate`); the page reloads once when an update takes over — the order is saved on every change, so nothing is lost.
+- "Review order" stays navy on an empty cart and simply does nothing, as specified (no disabled styling to avoid a grey "hover-like" state).
+- The Y split is drawn as a navy corner line from the Y button into the second dropdown instead of a small icon — the small icon was nearly invisible in screenshots.
+- Header and footer bars span the full width on tablets; content is centred at max 480 px.
+- Settings shows "Built-in prices" when the sheet has never been downloaded, and "Not set" in red when `accountant_whatsapp` is blank (the warning required by 7.4).
+- Reopening the app restores the screen it was on (via history state); a screen with nothing to show (e.g. summary of an empty cart) falls back to the previous one.
+- Full reset unwinds browser history back to Build, so the back button can't return to a cleared order.
+- E2E tests run against a production build with fake sheet links (`.env.e2e` → https://sheet.test/…), intercepted by Playwright; WhatsApp is intercepted with a 204 so the page stays put.
