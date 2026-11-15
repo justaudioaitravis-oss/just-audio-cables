@@ -58,3 +58,4 @@ One line each: decision — why.
 - Loose cable (both ends None) already had no service charge — kept, now covered by a test.
 - Double-tap guard: for 350 ms after moving to another screen, that screen ignores taps (CSS `pointer-events: none`). Stops a double-tap on Review order from approving, on Approve from starting a New order, and on Proceed from landing on Review order. Not applied to in-place updates such as the cart steppers.
 - Custom length accepts plain decimals only (comma allowed as the decimal mark); "1e2", "-5" and "3m" are refused.
+- Lengths above 50 m (owner request): 60, 70, 80, 90, 100 m, then Custom — same 10 m steps as 30→40→50; anything else via Custom (up to 500 m).

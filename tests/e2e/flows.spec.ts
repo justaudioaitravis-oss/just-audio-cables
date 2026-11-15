@@ -502,3 +502,12 @@ test('double-tapping Proceed adds one cable and stays on the Cart', async ({ pag
   await expect(lines(page)).toHaveCount(1);
   await expect(lines(page).first().locator('.step-qty')).toHaveText('1');
 });
+
+test('length dropdown goes up to 100 m, then Custom', async ({ page }) => {
+  await open(page);
+  const opts = await page.locator(`${sel.length} option`).allTextContents();
+  expect(opts.slice(-7)).toEqual(['50 m', '60 m', '70 m', '80 m', '90 m', '100 m', 'Custom']);
+  await pick(page, 'xlr_m', 'xlr_f', '100');
+  // 445 + 512 + 7443 + 236
+  await expect(page.locator(sel.metal)).toContainText('₹8,636');
+});

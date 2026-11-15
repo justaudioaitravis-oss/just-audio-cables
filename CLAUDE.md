@@ -6,6 +6,7 @@ You are building a complete, finished app **autonomously**. The owner will start
 > - Tiers are **Neutrik** (`metal_price`), **Generic metal** (`generic_metal_price` / `generic_metal_tally_name`: Amphenol or any non-Neutrik metal) and **Generic plastic** (`plastic_price`), shown as three price rows. Power and loose cable still show one PRICE card.
 > - **Loose connectors:** the Cable dropdown ends with **No cable**. It hides Length and prices the connectors only, with **no service charge**. Loose cable (None → None) also has no service charge.
 > - Taps are ignored for 350 ms after a screen change (double-tap guard).
+> - Length dropdown continues after 50 m with 60, 70, 80, 90, 100 m, then Custom.
 > - Details are in `DECISIONS.md` under "Update requested by the owner".
 
 ---
