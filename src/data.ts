@@ -200,9 +200,9 @@ export function loadInitial(): PriceData {
 export function sheetUrls(): RawCsv {
   const env = import.meta.env;
   return {
-    connectors: SHEET_CSV.connectors || env.VITE_SHEET_CONNECTORS || '',
-    cables: SHEET_CSV.cables || env.VITE_SHEET_CABLES || '',
-    settings: SHEET_CSV.settings || env.VITE_SHEET_SETTINGS || '',
+    connectors: env.VITE_SHEET_CONNECTORS || SHEET_CSV.connectors || '',
+    cables: env.VITE_SHEET_CABLES || SHEET_CSV.cables || '',
+    settings: env.VITE_SHEET_SETTINGS || SHEET_CSV.settings || '',
   };
 }
 

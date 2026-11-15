@@ -12,7 +12,7 @@ One line each: decision — why.
 - `plastic_tally_name` is only required when `plastic_price` is filled — no plastic price means no plastic item is ever sent.
 - `accountant_whatsapp` has everything except digits stripped (so "+91 98220 12345" also works).
 - `gst_rate` outside 0–1 is rejected — guards against someone typing 18 instead of 0.18.
-- If the sheet links are blank in `src/config.ts`, Vite env vars `VITE_SHEET_CONNECTORS/CABLES/SETTINGS` are used as a fallback — lets e2e tests point at a fake sheet without editing the owner's file.
+- Vite env vars `VITE_SHEET_CONNECTORS/CABLES/SETTINGS`, when set, override the links in `src/config.ts` — only the e2e build sets them (fake sheet), so tests never touch the real sheet; normal builds use `config.ts`.
 - Background refresh runs on launch, when the phone comes back online, and when the app is reopened after 30+ minutes — "next time the app opens online".
 
 ## Pricing
