@@ -1,24 +1,24 @@
-id,label,group,metal_price,plastic_price,metal_tally_name,plastic_tally_name,default_cable,sort,active,confirmed
-xlr_m,XLR Male,audio,445,150,NEUTRIK NC3MXX,PLASTIC XLR MALE,mic,10,TRUE,TRUE
-xlr_f,XLR Female,audio,512,150,NEUTRIK NC3FXX,PLASTIC XLR FEMALE,mic,20,TRUE,TRUE
-jack_ts,Jack TS (mono),audio,445,250,NEUTRIK NP2X,PLASTIC JACK TS,mic,30,TRUE,TRUE
-jack_trs,Jack TRS (stereo),audio,510,250,NEUTRIK NP3X,PLASTIC JACK TRS,mic,40,TRUE,FALSE
-ep,EP,audio,553,180,NEUTRIK NTP3RC,PLASTIC EP,slim,50,TRUE,FALSE
-speakon,Speakon,audio,575,200,NEUTRIK NL4FX,PLASTIC SPEAKON,mic,60,TRUE,FALSE
-rca,RCA,audio,290,180,AMPHENOL ACPR,PLASTIC RCA,mic,70,TRUE,FALSE
-speakon_8,Speakon 8-pole,audio,1628,,NEUTRIK NL8FC,,spk_12_4,80,TRUE,FALSE
-ethercon,EtherCON,data,425,,NEUTRIK NE8MX,,cat_tbd,90,TRUE,FALSE
-powercon_in,PowerCON (in),power,616,,NEUTRIK NAC3FCA,,mic,100,TRUE,FALSE
-powercon_out,PowerCON (out),power,642,,NEUTRIK NAC3FCB,,mic,110,TRUE,FALSE
-true1_f,PowerCON TRUE1 F,power,900,,NEUTRIK NAC3F TRUE1,,power_tbd,120,TRUE,FALSE
-true1_m,PowerCON TRUE1 M,power,1000,,NEUTRIK NAC3M TRUE1,,power_tbd,130,TRUE,FALSE
-bals_16_3_f,Bals 16A 3-pin F,power,807,,BALS 16A 3PIN FEMALE PM,,power_tbd,140,TRUE,FALSE
-bals_16_3_m,Bals 16A 3-pin M,power,1322,,BALS 16A 3PIN MALE PM,,power_tbd,150,TRUE,FALSE
-bals_32_3_f,Bals 32A 3-pin F,power,1374,,BALS 32A 3PIN FEMALE PM,,power_tbd,160,TRUE,FALSE
-bals_32_3_m,Bals 32A 3-pin M,power,1850,,BALS 32A 3PIN MALE PM,,power_tbd,170,TRUE,FALSE
-bals_32_5_f,Bals 32A 5-pin F,power,1614,,BALS 32A 5PIN FEMALE PM,,power_tbd,180,TRUE,FALSE
-bals_32_5_m,Bals 32A 5-pin M,power,2063,,BALS 32A 5PIN MALE PM,,power_tbd,190,TRUE,FALSE
-bals_63_5_f,Bals 63A 5-pin F,power,5739,,BALS 63A 5PIN FEMALE PM,,power_tbd,200,TRUE,FALSE
-bals_63_5_m,Bals 63A 5-pin M,power,9185,,BALS 63A 5PIN MALE PM,,power_tbd,210,TRUE,FALSE
-camlock_p,Camlock (P),power,991,,CAMLOCK PP200P,,power_tbd,220,TRUE,FALSE
-camlock_c,Camlock (C),power,991,,CAMLOCK PP200C,,power_tbd,230,TRUE,FALSE
+id,label,group,metal_price,plastic_price,metal_tally_name,plastic_tally_name,default_cable,sort,active,confirmed,generic_metal_price,generic_metal_tally_name
+xlr_m,XLR Male,audio,445,150,NEUTRIK NC3MXX,PLASTIC XLR MALE,mic,10,TRUE,TRUE,,
+xlr_f,XLR Female,audio,512,150,NEUTRIK NC3FXX,PLASTIC XLR FEMALE,mic,20,TRUE,TRUE,,
+jack_ts,Jack TS (mono),audio,445,250,NEUTRIK NP2X,PLASTIC JACK TS,mic,30,TRUE,TRUE,,
+jack_trs,Jack TRS (stereo),audio,510,250,NEUTRIK NP3X,PLASTIC JACK TRS,mic,40,TRUE,FALSE,,
+ep,EP,audio,553,180,NEUTRIK NTP3RC,PLASTIC EP,slim,50,TRUE,FALSE,,
+speakon,Speakon,audio,575,200,NEUTRIK NL4FX,PLASTIC SPEAKON,mic,60,TRUE,FALSE,,
+rca,RCA,audio,,180,,PLASTIC RCA,mic,70,TRUE,FALSE,290,AMPHENOL ACPR
+speakon_8,Speakon 8-pole,audio,1628,,NEUTRIK NL8FC,,spk_12_4,80,TRUE,FALSE,,
+ethercon,EtherCON,data,425,,NEUTRIK NE8MX,,cat_tbd,90,TRUE,FALSE,,
+powercon_in,PowerCON (in),power,616,,NEUTRIK NAC3FCA,,mic,100,TRUE,FALSE,,
+powercon_out,PowerCON (out),power,642,,NEUTRIK NAC3FCB,,mic,110,TRUE,FALSE,,
+true1_f,PowerCON TRUE1 F,power,900,,NEUTRIK NAC3F TRUE1,,power_tbd,120,TRUE,FALSE,,
+true1_m,PowerCON TRUE1 M,power,1000,,NEUTRIK NAC3M TRUE1,,power_tbd,130,TRUE,FALSE,,
+bals_16_3_f,Bals 16A 3-pin F,power,807,,BALS 16A 3PIN FEMALE PM,,power_tbd,140,TRUE,FALSE,,
+bals_16_3_m,Bals 16A 3-pin M,power,1322,,BALS 16A 3PIN MALE PM,,power_tbd,150,TRUE,FALSE,,
+bals_32_3_f,Bals 32A 3-pin F,power,1374,,BALS 32A 3PIN FEMALE PM,,power_tbd,160,TRUE,FALSE,,
+bals_32_3_m,Bals 32A 3-pin M,power,1850,,BALS 32A 3PIN MALE PM,,power_tbd,170,TRUE,FALSE,,
+bals_32_5_f,Bals 32A 5-pin F,power,1614,,BALS 32A 5PIN FEMALE PM,,power_tbd,180,TRUE,FALSE,,
+bals_32_5_m,Bals 32A 5-pin M,power,2063,,BALS 32A 5PIN MALE PM,,power_tbd,190,TRUE,FALSE,,
+bals_63_5_f,Bals 63A 5-pin F,power,5739,,BALS 63A 5PIN FEMALE PM,,power_tbd,200,TRUE,FALSE,,
+bals_63_5_m,Bals 63A 5-pin M,power,9185,,BALS 63A 5PIN MALE PM,,power_tbd,210,TRUE,FALSE,,
+camlock_p,Camlock (P),power,991,,CAMLOCK PP200P,,power_tbd,220,TRUE,FALSE,,
+camlock_c,Camlock (C),power,991,,CAMLOCK PP200C,,power_tbd,230,TRUE,FALSE,,

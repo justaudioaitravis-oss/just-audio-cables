@@ -3,6 +3,7 @@ import Papa from 'papaparse';
 import type { Cable, Connector, Group, PriceData, Settings } from './types';
 import { SHEET_CSV } from './config';
 import { storage } from './storage';
+import { NO_CABLE } from './pricing';
 import defaultConnectors from '../public/data/connectors.csv?raw';
 import defaultCables from '../public/data/cables.csv?raw';
 import defaultSettings from '../public/data/settings.csv?raw';
@@ -84,15 +85,24 @@ export function parseConnectors(csv: string): Connector[] {
     if (!['audio', 'power', 'data'].includes(group)) {
       throw new DataError(`${at} group: "${r.group ?? ''}" should be audio, power or data`);
     }
+    const metal = optNum(r.metal_price, `${at} metal_price`);
+    const generic = optNum(r.generic_metal_price, `${at} generic_metal_price`);
     const plastic = optNum(r.plastic_price, `${at} plastic_price`);
+    if (group === 'power' && metal === null) throw new DataError(`${at} metal_price: power connectors need a price`);
+    if (metal === null && generic === null && plastic === null) throw new DataError(`${at}: no price filled in`);
+    // a tally name is only needed for the tiers that have a price
+    const name = (price: number | null, v: string | undefined, col: string) =>
+      price === null ? (v ?? '').trim() : text(v, `${at} ${col}`);
     return {
       id,
       label: text(r.label, `${at} label`),
       group: group as Group,
-      metal_price: num(r.metal_price, `${at} metal_price`),
+      metal_price: metal,
+      generic_metal_price: generic,
       plastic_price: plastic,
-      metal_tally_name: text(r.metal_tally_name, `${at} metal_tally_name`),
-      plastic_tally_name: plastic === null ? (r.plastic_tally_name ?? '') : text(r.plastic_tally_name, `${at} plastic_tally_name`),
+      metal_tally_name: name(metal, r.metal_tally_name, 'metal_tally_name'),
+      generic_metal_tally_name: name(generic, r.generic_metal_tally_name, 'generic_metal_tally_name'),
+      plastic_tally_name: name(plastic, r.plastic_tally_name, 'plastic_tally_name'),
       default_cable: text(r.default_cable, `${at} default_cable`),
       sort: num(r.sort, `${at} sort`),
       active: bool(r.active, `${at} active`, true),
@@ -120,6 +130,7 @@ export function parseCables(csv: string): Cable[] {
     };
   });
   if (list.length === 0) throw new DataError('Cables: no rows');
+  if (list.some((c) => c.id === NO_CABLE)) throw new DataError(`Cables: id "${NO_CABLE}" is reserved`);
   uniqueIds(list, 'Cables');
   return list;
 }

@@ -14,8 +14,8 @@ async function expectBlankBuild(page: Page) {
   await expect(page.locator(sel.endA2)).toBeHidden();
   await expect(page.locator(sel.endB2)).toBeHidden();
   await expect(page.locator(sel.custom)).toBeHidden();
-  await expect(page.locator(sel.metal)).toContainText('—');
-  await expect(page.locator(sel.plastic)).toContainText('—');
+  for (const c of [sel.metal, sel.generic, sel.plastic]) await expect(page.locator(c)).toContainText('—');
+  await expect(page.locator(sel.length)).toBeVisible();
   await expect(page.locator('.card.selected')).toHaveCount(0);
   await expect(page.locator(sel.msg)).toBeHidden();
   expect(await page.locator('[data-screen="build"] .body').evaluate((e) => e.scrollTop)).toBe(0);
@@ -58,7 +58,7 @@ test('validation messages appear one at a time, in order', async ({ page }) => {
   await expect(msg).toHaveText('Pick a length');
   await page.fill(sel.custom, '2.5');
   await proceed.click();
-  await expect(msg).toHaveText('Pick Metal or Plastic');
+  await expect(msg).toHaveText('Pick a price');
   await expect(page.locator('[data-screen="build"]')).toBeVisible();
 });
 
@@ -80,7 +80,7 @@ test('simple cable goes to the cart', async ({ page }) => {
   await expect(page.locator('[data-screen="cart"]')).toBeVisible();
   await expect(lines(page)).toHaveCount(1);
   await expect(lines(page).first()).toContainText('10m XLR Male – XLR Female');
-  await expect(lines(page).first()).toContainText('Metal · ₹1,937');
+  await expect(lines(page).first()).toContainText('Neutrik · ₹1,937');
   await expect(page.locator('.total-value')).toHaveText('₹1,937');
 });
 
@@ -158,7 +158,7 @@ test('plastic unavailable shows — and ignores taps', async ({ page }) => {
   await page.click(sel.plastic, { force: true });
   await expect(page.locator(sel.plastic)).toHaveAttribute('aria-pressed', 'false');
   await page.getByRole('button', { name: 'Proceed' }).click();
-  await expect(page.locator(sel.msg)).toHaveText('Pick Metal or Plastic');
+  await expect(page.locator(sel.msg)).toHaveText('Pick a price');
 });
 
 test('identical cables merge; Add another cable keeps selections; stepper to zero removes', async ({ page }) => {
@@ -176,7 +176,7 @@ test('identical cables merge; Add another cable keeps selections; stepper to zer
   await page.getByRole('button', { name: 'Proceed' }).click();
   await expect(lines(page)).toHaveCount(1);
   await expect(lines(page).first().locator('.step-qty')).toHaveText('2');
-  await expect(lines(page).first()).toContainText('Metal · ₹3,875');
+  await expect(lines(page).first()).toContainText('Neutrik · ₹3,875');
   await expect(page.locator('.total-value')).toHaveText('₹3,875');
 
   await page.getByRole('button', { name: /^Increase/ }).click();
@@ -380,4 +380,125 @@ test('a short tap on the logo does nothing', async ({ page }) => {
   await page.locator('.screen-build .logo').click();
   await page.waitForTimeout(1200);
   await expect(page.locator('[data-screen="build"]')).toBeVisible();
+});
+
+test('three price rows: Neutrik, Generic metal, Generic plastic', async ({ page }) => {
+  await open(page);
+  await pick(page, 'rca', 'rca', '2');
+  await expect(page.locator(sel.metal)).toContainText('Neutrik');
+  await expect(page.locator(sel.metal)).toContainText('—');
+  await expect(page.locator(sel.generic)).toContainText('Generic metal');
+  await expect(page.locator(sel.generic)).toContainText('₹965');
+  await expect(page.locator(sel.plastic)).toContainText('Generic plastic');
+  await page.click(sel.metal, { force: true });
+  await expect(page.locator('.card.selected')).toHaveCount(0);
+  await page.click(sel.generic);
+  await page.getByRole('button', { name: 'Proceed' }).click();
+  await expect(lines(page).first()).toContainText('2m RCA – RCA');
+  await expect(lines(page).first()).toContainText('Generic metal · ₹965');
+  await page.getByRole('button', { name: 'Add another cable' }).click();
+  await page.click(sel.plastic);
+  await page.getByRole('button', { name: 'Proceed' }).click();
+  await expect(lines(page).nth(1)).toContainText('Generic plastic · ₹745');
+  await page.getByRole('button', { name: 'Review order' }).click();
+  await expect(page.locator('.item').first()).toContainText('AMPHENOL ACPR');
+});
+
+test('loose connectors: No cable hides Length, prices connectors only, no service charge', async ({ page }) => {
+  const wa = await catchWhatsApp(page);
+  await open(page);
+  await page.fill(sel.customer, 'Ravi');
+  await page.selectOption(sel.endA, 'xlr_m');
+  await page.click(sel.yA);
+  await page.selectOption(sel.endA2, 'xlr_f');
+  await page.selectOption(sel.endB, 'none');
+  await page.selectOption(sel.cable, 'no_cable');
+  await expect(page.locator(sel.length)).toBeHidden();
+  await expect(page.locator(sel.metal)).toContainText('₹957');
+  await expect(page.locator(sel.plastic)).toContainText('₹300');
+  await page.getByRole('button', { name: 'Proceed' }).click();
+  await expect(page.locator(sel.msg)).toHaveText('Pick a price');
+  await page.click(sel.metal);
+  await page.getByRole('button', { name: 'Proceed' }).click();
+  await expect(lines(page).first()).toContainText('XLR Male + XLR Female (loose)');
+  await expect(lines(page).first()).toContainText('Neutrik · ₹957');
+  await page.getByRole('button', { name: 'Review order' }).click();
+  await expect(page.locator('[data-screen="summary"]')).not.toContainText('SERVICE CHARGE');
+  await expect(page.locator('.item')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Approve' }).click();
+  await expect.poll(() => wa.length).toBe(1);
+  const text = new URL(wa[0]).searchParams.get('text')!;
+  expect(text).not.toContain('SERVICE CHARGE');
+  expect(text).not.toContain(' m × ');
+  expect(text).toContain('TOTAL: ₹957');
+});
+
+test('No cable with both ends None asks for a cable', async ({ page }) => {
+  await open(page);
+  await page.selectOption(sel.endA, 'none');
+  await page.selectOption(sel.endB, 'none');
+  await page.selectOption(sel.cable, 'no_cable');
+  await page.getByRole('button', { name: 'Proceed' }).click();
+  await expect(page.locator(sel.msg)).toHaveText('Pick a cable');
+});
+
+test('custom length refuses non-numbers like 1e2', async ({ page }) => {
+  await open(page);
+  await pick(page, 'xlr_m', 'xlr_f', 'custom');
+  await page.fill(sel.custom, '1e2');
+  await expect(page.locator(sel.metal)).toContainText('—');
+  await page.fill(sel.custom, '1,5');
+  await expect(page.locator(sel.metal)).toContainText('₹1,305');
+});
+
+/** Two physical taps 60 ms apart at the same spot (Playwright's normal click would wait out the guard). */
+async function doubleTap(page: Page, selector: string) {
+  await page.waitForTimeout(500); // a person reads the screen before the first tap
+  const box = (await page.locator(selector).boundingBox())!;
+  for (let i = 0; i < 2; i++) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await page.waitForTimeout(60);
+  }
+  await page.waitForTimeout(400);
+}
+
+test('double-tapping Review order does not approve the order', async ({ page }) => {
+  const wa = await catchWhatsApp(page);
+  await open(page);
+  await page.fill(sel.customer, 'Ravi');
+  await pick(page, 'xlr_m', 'xlr_f', '10');
+  await page.click(sel.metal);
+  await page.getByRole('button', { name: 'Proceed' }).click();
+  await doubleTap(page, '[data-screen="cart"] .btn-primary');
+  await expect(page.locator('[data-screen="summary"]')).toBeVisible();
+  expect(wa).toHaveLength(0);
+});
+
+test('double-tapping Approve sends once and keeps the Sent screen', async ({ page }) => {
+  const wa = await catchWhatsApp(page);
+  await open(page);
+  await page.fill(sel.customer, 'Ravi');
+  await pick(page, 'xlr_m', 'xlr_f', '10');
+  await page.click(sel.metal);
+  await page.getByRole('button', { name: 'Proceed' }).click();
+  await page.getByRole('button', { name: 'Review order' }).click();
+  await doubleTap(page, '.btn-approve');
+  await expect(page.locator('[data-screen="sent"]')).toBeVisible();
+  expect(wa).toHaveLength(1);
+});
+
+test('double-tapping Proceed adds one cable and stays on the Cart', async ({ page }) => {
+  await open(page);
+  await pick(page, 'xlr_m', 'xlr_f', '10');
+  await page.click(sel.metal);
+  // tap where Proceed's right side overlaps the Cart's Review order button
+  const box = (await page.getByRole('button', { name: 'Proceed' }).boundingBox())!;
+  for (let i = 0; i < 2; i++) {
+    await page.mouse.click(box.x + box.width - 30, box.y + box.height / 2);
+    await page.waitForTimeout(60);
+  }
+  await page.waitForTimeout(400);
+  await expect(page.locator('[data-screen="cart"]')).toBeVisible();
+  await expect(lines(page)).toHaveCount(1);
+  await expect(lines(page).first().locator('.step-qty')).toHaveText('1');
 });

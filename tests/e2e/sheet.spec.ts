@@ -53,8 +53,8 @@ test('new rows in the sheet appear in the dropdowns; removed selections are clea
   await page.selectOption(sel.endA, 'rca');
   await serveSheet(page, {
     connectors:
-      CSV.connectors.replace('rca,RCA,audio,290,180,AMPHENOL ACPR,PLASTIC RCA,mic,70,TRUE', 'rca,RCA,audio,290,180,AMPHENOL ACPR,PLASTIC RCA,mic,70,FALSE') +
-      'mini_xlr,Mini XLR,audio,700,,NEUTRIK MINI,,slim,5,TRUE,FALSE\n',
+      CSV.connectors.replace('rca,RCA,audio,,180,,PLASTIC RCA,mic,70,TRUE', 'rca,RCA,audio,,180,,PLASTIC RCA,mic,70,FALSE') +
+      'mini_xlr,Mini XLR,audio,700,,NEUTRIK MINI,,slim,5,TRUE,FALSE,,\n',
   });
   await longPressLogo(page);
   await page.getByRole('button', { name: 'Update now' }).click();

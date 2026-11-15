@@ -4,9 +4,13 @@ export interface Connector {
   id: string;
   label: string;
   group: Group;
-  metal_price: number;
+  /** Neutrik price (power: the single price). null = no Neutrik version. */
+  metal_price: number | null;
+  /** Generic metal (Amphenol or other non-Neutrik metal). null = not available. */
+  generic_metal_price: number | null;
   plastic_price: number | null;
   metal_tally_name: string;
+  generic_metal_tally_name: string;
   plastic_tally_name: string;
   default_cable: string;
   sort: number;
@@ -38,10 +42,16 @@ export interface PriceData {
   settings: Settings;
 }
 
-/** Metal / Plastic for normal audio cables; Standard for power or loose cable (single PRICE card). */
-export type Tier = 'metal' | 'plastic' | 'standard';
+/**
+ * metal = Neutrik, generic = generic metal (Amphenol etc.), plastic = generic plastic.
+ * standard = the single PRICE card (power connectors, or loose cable).
+ */
+export type Tier = 'metal' | 'generic' | 'plastic' | 'standard';
 
-/** One cable to be priced. An end is a list of connector ids: [] = None, 1 = single, 2 = Y split. */
+/**
+ * One cable to be priced. An end is a list of connector ids: [] = None, 1 = single, 2 = Y split.
+ * cableId = NO_CABLE ('no_cable') means loose connector(s): no cable, no length, no service charge.
+ */
 export interface CableSpec {
   endA: string[];
   endB: string[];

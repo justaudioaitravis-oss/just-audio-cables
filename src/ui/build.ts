@@ -2,8 +2,8 @@ import { h, option } from './dom';
 import { icon } from './icons';
 import type { App } from '../app';
 import { activeCables, activeConnectors } from '../data';
-import { inr0, makeCartLine, addToCart, quote } from '../pricing';
-import { CUSTOM, LENGTHS, NONE, applyAutoCable, lengthValue, specOf, type EndSel } from '../state';
+import { NO_CABLE, inr0, makeCartLine, addToCart, quote } from '../pricing';
+import { CUSTOM, LENGTHS, NONE, applyAutoCable, isNoCable, lengthValue, specOf, type EndSel } from '../state';
 import type { Tier } from '../types';
 import logoUrl from '../../assets/logo.png';
 
@@ -121,15 +121,17 @@ export function createBuild(app: App): BuildView {
     changed(true);
   });
 
+  const lengthField = h('div.field', {}, h('label.label', { for: 'f-length' }, 'Length'), h('div.ctrl-row', {}, length, customWrap));
+
   // ---------- price cards ----------
   const card = (tier: Tier, label: string) => {
     const value = h('span.card-price', {}, '—');
     const btn = h(
       'button.card',
       { type: 'button', 'data-tier': tier, 'aria-pressed': 'false' },
+      h('span.card-check', { 'aria-hidden': 'true' }, icon('check', 14, 2.5)),
       h('span.card-label', {}, label),
       value,
-      h('span.card-check', { 'aria-hidden': 'true' }, icon('check', 14, 2.5)),
     );
     btn.addEventListener('click', () => {
       if (btn.getAttribute('aria-disabled') === 'true') return;
@@ -138,11 +140,11 @@ export function createBuild(app: App): BuildView {
     });
     return { btn, value };
   };
-  const metal = card('metal', 'Metal');
-  const plastic = card('plastic', 'Plastic');
+  const metal = card('metal', 'Neutrik');
+  const generic = card('generic', 'Generic metal');
+  const plastic = card('plastic', 'Generic plastic');
   const single = card('standard', 'Price');
-  single.btn.classList.add('card-wide');
-  const cards = h('div.cards', {}, metal.btn, plastic.btn, single.btn);
+  const cards = h('div.cards', {}, metal.btn, generic.btn, plastic.btn, single.btn);
 
   const fields = h(
     'div.wrap.build',
@@ -156,7 +158,7 @@ export function createBuild(app: App): BuildView {
     ends[0].wrap,
     ends[1].wrap,
     h('div.field', {}, h('label.label', { for: 'f-cable' }, 'Cable'), cable),
-    h('div.field', {}, h('label.label', { for: 'f-length' }, 'Length'), h('div.ctrl-row', {}, length, customWrap)),
+    lengthField,
     cards,
   );
   const body = h('main.body', {}, fields);
@@ -193,16 +195,16 @@ export function createBuild(app: App): BuildView {
     if (!b.endA.a) return showMsg('Pick End A');
     if (!b.endB.a) return showMsg('Pick End B');
     if (!b.cable) return showMsg('Pick a cable');
-    if (lengthValue(b) === null) return showMsg('Pick a length');
+    if (!isNoCable(b) && lengthValue(b) === null) return showMsg('Pick a length');
     const spec = specOf(b);
-    const q = spec ? quote(spec, app.data) : null;
+    if (!spec) return showMsg('Pick a cable'); // "No cable" with both ends None: nothing to sell
+    const q = quote(spec, app.data);
     const ok =
-      q &&
       b.tier &&
       ((q.single && b.tier === 'standard') || (!q.single && b.tier !== 'standard' && q[b.tier] !== null));
-    if (!spec || !q || !ok || !b.tier) return showMsg(q?.single ? 'Tap the price' : 'Pick Metal or Plastic');
+    if (!ok || !b.tier) return showMsg(q.single ? 'Tap the price' : 'Pick a price');
     const line = makeCartLine(spec, b.tier, app.data, newId());
-    if (!line) return showMsg('Pick Metal or Plastic');
+    if (!line) return showMsg('Pick a price');
     app.order.cart = addToCart(app.order.cart, line);
     b.tier = null;
     app.save();
@@ -216,7 +218,11 @@ export function createBuild(app: App): BuildView {
       e.main.replaceChildren(option('', 'Select connector', { disabled: true }), ...conns.map((c) => option(c.id, c.label)), option(NONE, 'None'));
       e.second.replaceChildren(...conns.map((c) => option(c.id, c.label)));
     }
-    cable.replaceChildren(option('', 'Select cable', { disabled: true }), ...activeCables(app.data).map((c) => option(c.id, c.label)));
+    cable.replaceChildren(
+      option('', 'Select cable', { disabled: true }),
+      ...activeCables(app.data).map((c) => option(c.id, c.label)),
+      option(NO_CABLE, 'No cable'),
+    );
     sync();
   }
 
@@ -244,6 +250,7 @@ export function createBuild(app: App): BuildView {
       if (on) setSelect(e.second, sel.b ?? '');
     }
     setSelect(cable, b.cable);
+    lengthField.hidden = isNoCable(b);
     setSelect(length, b.length);
     const isCustom = b.length === CUSTOM;
     customWrap.hidden = !isCustom;
@@ -273,6 +280,7 @@ export function createBuild(app: App): BuildView {
     }
 
     metal.btn.hidden = isSingle;
+    generic.btn.hidden = isSingle;
     plastic.btn.hidden = isSingle;
     single.btn.hidden = !isSingle;
     const paint = (c: { btn: HTMLButtonElement; value: HTMLElement }, tier: Tier, price: number | null) => {
@@ -284,6 +292,7 @@ export function createBuild(app: App): BuildView {
       c.btn.classList.toggle('selected', selected);
     };
     paint(metal, 'metal', q && !isSingle ? q.metal : null);
+    paint(generic, 'generic', q && !isSingle ? q.generic : null);
     paint(plastic, 'plastic', q && !isSingle ? q.plastic : null);
     paint(single, 'standard', q && isSingle ? q.standard : null);
   }

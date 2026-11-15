@@ -11,6 +11,8 @@ import {
   inr2,
   isSingleMode,
   makeCartLine,
+  NO_CABLE,
+  tierLabel,
   orderTotal,
   quote,
   unitPrice,
@@ -110,6 +112,80 @@ describe('tiers', () => {
   it('returns null without cable or length', () => {
     expect(unitPrice(spec(['xlr_m'], ['xlr_f'], '', 10), 'metal', data)).toBeNull();
     expect(unitPrice(spec(['xlr_m'], ['xlr_f'], 'mic', 0), 'metal', data)).toBeNull();
+  });
+});
+
+describe('three tiers: Neutrik, Generic metal, Generic plastic', () => {
+  it('Neutrik uses metal_price; Generic plastic uses plastic_price', () => {
+    const q = quote(ex1, data);
+    expect(q.metal).toBeCloseTo(1937.3, 9);
+    expect(q.plastic).toBeCloseTo(1280.3, 9);
+  });
+  it('Generic metal is unavailable when any connector has no generic metal price', () => {
+    expect(quote(ex1, data).generic).toBeNull();
+  });
+  it('RCA: Amphenol is generic metal, and there is no Neutrik version', () => {
+    const q = quote(spec(['rca'], ['rca'], 'mic', 2), data);
+    // 290×2 + 148.86 + 236
+    expect(q.generic).toBeCloseTo(964.86, 9);
+    expect(q.metal).toBeNull();
+    expect(q.plastic).toBeCloseTo(180 * 2 + 148.86 + 236, 9);
+    const l = makeCartLine(spec(['rca'], ['rca'], 'mic', 2), 'generic', data, 'g')!;
+    expect(l.parts[0]).toEqual({ name: 'AMPHENOL ACPR', unit: 'pcs', qty: 1, rate: 290 });
+  });
+  it('generic metal prices filled in the sheet are used', () => {
+    const d: PriceData = {
+      ...data,
+      connectors: data.connectors.map((c) =>
+        c.id.startsWith('xlr') ? { ...c, generic_metal_price: 300, generic_metal_tally_name: `AMPHENOL ${c.id}` } : c,
+      ),
+    };
+    expect(quote(ex1, d).generic).toBeCloseTo(300 + 300 + 744.3 + 236, 9);
+  });
+  it('tier names', () => {
+    expect(['metal', 'generic', 'plastic', 'standard'].map((t) => tierLabel(t as Tier))).toEqual([
+      'Neutrik',
+      'Generic metal',
+      'Generic plastic',
+      'Standard',
+    ]);
+  });
+});
+
+describe('loose connectors (No cable)', () => {
+  const one = spec(['xlr_m'], [], NO_CABLE, 0);
+  it('prices the connector only, with no service charge', () => {
+    const q = quote(one, data);
+    expect(q.single).toBe(false);
+    expect(q.metal).toBe(445);
+    expect(q.plastic).toBe(150);
+  });
+  it('a Y pair of loose connectors: both priced, still no service', () => {
+    expect(unitPrice(spec(['xlr_m', 'xlr_f'], [], NO_CABLE, 0), 'metal', data)).toBe(957);
+  });
+  it('a loose power connector uses the single price', () => {
+    const q = quote(spec(['bals_32_3_f'], [], NO_CABLE, 0), data);
+    expect(q.single).toBe(true);
+    expect(q.standard).toBe(1374);
+  });
+  it('nothing to price when both ends are None', () => {
+    expect(unitPrice(spec([], [], NO_CABLE, 0), 'standard', data)).toBeNull();
+  });
+  it('cart title, consolidation and message have no cable and no service', () => {
+    const l = makeCartLine(one, 'metal', data, 'x')!;
+    expect(l.title).toBe('XLR Male (loose)');
+    expect(l.points).toBe(0);
+    const cart = addToCart(addToCart([], l), makeCartLine(one, 'metal', data, 'y')!);
+    expect(cart[0].qty).toBe(2);
+    const c = consolidate(cart);
+    expect(c.items).toEqual([{ name: 'NEUTRIK NC3MXX', unit: 'pcs', qty: 2, rate: 445, amount: 890 }]);
+    expect(c.service).toEqual([]);
+    expect(formatMessage(cart, 'Ravi', '', 'Just Audio', new Date(2026, 10, 15, 9, 5))).toBe(
+      ['JUST AUDIO – Cable order', 'Customer: Ravi', '15 Nov 2026, 9:05 am', '', 'NEUTRIK NC3MXX', '2 pcs × ₹445.00 = ₹890.00', '', 'TOTAL: ₹890'].join('\n'),
+    );
+  });
+  it('loose cable (None → None) also has no service charge', () => {
+    expect(makeCartLine(ex6, 'standard', data, 'z')!.points).toBe(0);
   });
 });
 

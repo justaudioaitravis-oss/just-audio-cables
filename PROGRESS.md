@@ -20,6 +20,13 @@
 
 Every assumption is listed in `DECISIONS.md`.
 
+## Update (15 Nov 2026, after launch)
+- [x] Live stress test. Found: a double-tap on Review order could send an unreviewed order, and a double-tap on Approve could wipe the order. Both fixed with a tap guard and covered by e2e tests.
+- [x] Three tiers: Neutrik / Generic metal / Generic plastic. The sheet is backward compatible; two optional new columns (see README).
+- [x] Loose connectors ("No cable"), with no service charge. Loose cable also has no service charge (already the case, now tested).
+- [x] Custom length refuses "1e2" and similar.
+- Owner to do: add the two generic metal columns to the live sheet and move RCA's Amphenol price into them (README, step 1).
+
 ## Milestones
 - [x] **M0 Setup:** Vite + TS project, lint, Vitest, Playwright, git init, PROGRESS.md, DECISIONS.md
 - [x] **M1 Data:** default CSVs in `public/data/`; CSV loading, validation, caching, background refresh; unit tests

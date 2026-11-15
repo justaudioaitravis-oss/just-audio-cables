@@ -47,6 +47,7 @@ export const sel = {
   yA: '[data-testid="y-endA"]',
   yB: '[data-testid="y-endB"]',
   metal: '.card[data-tier="metal"]',
+  generic: '.card[data-tier="generic"]',
   plastic: '.card[data-tier="plastic"]',
   single: '.card[data-tier="standard"]',
   msg: '.screen-build .msg',
@@ -59,6 +60,7 @@ export async function pick(page: Page, a: string, b: string, length: string): Pr
 }
 
 export async function longPressLogo(page: Page): Promise<void> {
+  await page.waitForTimeout(400); // taps are ignored briefly after a screen change
   const box = await page.locator('.screen-build .logo').boundingBox();
   if (!box) throw new Error('no logo');
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);

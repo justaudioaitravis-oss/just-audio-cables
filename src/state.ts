@@ -1,7 +1,7 @@
 // Current order (customer, Build selections, cart) and its persistence.
 import type { CableSpec, CartLine, PriceData, Tier } from './types';
 import { storage } from './storage';
-import { autoCable, findCable, findConnector } from './pricing';
+import { NO_CABLE, autoCable, findCable, findConnector } from './pricing';
 
 export const NONE = 'none';
 export const CUSTOM = 'custom';
@@ -90,17 +90,29 @@ export function endIds(e: EndSel): string[] {
 
 export function lengthValue(b: BuildSel): number | null {
   const s = b.length === CUSTOM ? b.custom.trim().replace(',', '.') : b.length;
-  if (!s) return null;
+  if (!/^(\d+\.?\d*|\.\d+)$/.test(s)) return null; // plain decimals only ("1e2", "-5", "3m" refused)
   const n = Number(s);
   if (!Number.isFinite(n) || n < MIN_LEN || n > MAX_LEN) return null;
   return n;
 }
 
+/** Loose connectors: "No cable" chosen, so no length is needed. */
+export function isNoCable(b: BuildSel): boolean {
+  return b.cable === NO_CABLE;
+}
+
 /** A full spec when both ends, cable and a valid length are set; otherwise null. */
 export function specOf(b: BuildSel): CableSpec | null {
+  if (!b.endA.a || !b.endB.a || !b.cable) return null;
+  const endA = endIds(b.endA);
+  const endB = endIds(b.endB);
+  if (isNoCable(b)) {
+    if (endA.length + endB.length === 0) return null; // nothing to sell
+    return { endA, endB, cableId: NO_CABLE, lengthM: 0 };
+  }
   const len = lengthValue(b);
-  if (!b.endA.a || !b.endB.a || !b.cable || len === null) return null;
-  return { endA: endIds(b.endA), endB: endIds(b.endB), cableId: b.cable, lengthM: len };
+  if (len === null) return null;
+  return { endA, endB, cableId: b.cable, lengthM: len };
 }
 
 /** Re-apply the automatic cable choice (after any connector change). */
@@ -120,6 +132,6 @@ export function sanitizeBuild(b: BuildSel, data: PriceData): void {
     if (e.b && (!okConn(e.b) || !e.a || e.a === NONE)) e.b = null;
   }
   const cable = findCable(data, b.cable);
-  if (b.cable && !(cable && cable.active)) b.cable = '';
+  if (b.cable && b.cable !== NO_CABLE && !(cable && cable.active)) b.cable = '';
   if (b.length && b.length !== CUSTOM && !LENGTHS.includes(b.length)) b.length = '';
 }

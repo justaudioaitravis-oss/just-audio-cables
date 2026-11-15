@@ -13,6 +13,8 @@ export type Screen = 'build' | 'cart' | 'summary' | 'sent' | 'settings';
 /** How many history entries each screen sits above Build. */
 const DEPTH: Record<Screen, number> = { build: 0, cart: 1, summary: 2, sent: 3, settings: 1 };
 const AUTO_REFRESH_MS = 30 * 60 * 1000;
+/** After a screen change, ignore taps briefly so a double-tap can't hit the next screen's button. */
+const TAP_GUARD_MS = 350;
 
 export class App {
   data: PriceData;
@@ -27,6 +29,8 @@ export class App {
   private afterPop: (() => void) | null = null;
   private lastRefresh = 0;
   private freshSent = false;
+  private guardTimer: number | undefined;
+  private inPlace = false;
 
   constructor(root: HTMLElement) {
     this.root = root;
@@ -116,8 +120,16 @@ export class App {
       }
       this.root.append(el);
       this.current = el;
+      if (animate && !this.inPlace) this.guardTaps(el);
     }
     document.title = 'Cable Calculator';
+  }
+
+  private guardTaps(el: HTMLElement): void {
+    for (const s of this.root.querySelectorAll('.screen.guard')) s.classList.remove('guard');
+    el.classList.add('guard');
+    window.clearTimeout(this.guardTimer);
+    this.guardTimer = window.setTimeout(() => el.classList.remove('guard'), TAP_GUARD_MS);
   }
 
   /** Re-render the current (non-Build) screen in place. */
@@ -127,7 +139,9 @@ export class App {
     const before = this.current;
     this.current = null;
     before?.remove();
+    this.inPlace = true;
     this.show(this.allowed(this.screen), false);
+    this.inPlace = false;
     const body = this.current ? (this.current as HTMLElement).querySelector('.body') : null;
     if (body) body.scrollTop = scroll;
   }

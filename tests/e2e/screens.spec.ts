@@ -87,6 +87,17 @@ for (const size of sizes) {
       await page.selectOption(sel.endA, 'speakon_8');
       await page.selectOption(sel.endB, 'speakon_8');
       await shot(page, p('15-build-plastic-unavailable'));
+      await page.selectOption(sel.endA, 'rca');
+      await page.selectOption(sel.endB, 'rca');
+      await page.click(sel.generic);
+      await shot(page, p('15b-build-generic-metal'));
+      await page.selectOption(sel.endA, 'xlr_m');
+      await page.selectOption(sel.endB, 'none');
+      await page.selectOption(sel.cable, 'no_cable');
+      await page.click(sel.metal);
+      await shot(page, p('15c-build-loose-connector'));
+      await page.selectOption(sel.endB, 'xlr_f');
+      await page.selectOption(sel.length, '20');
 
       await page.getByRole('button', { name: 'Back' }).count(); // no-op: Build has no back arrow
       await page.selectOption(sel.endA, 'xlr_m');

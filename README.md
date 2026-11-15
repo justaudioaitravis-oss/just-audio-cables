@@ -1,6 +1,9 @@
 # Cable Calculator – Just Audio
 
-A phone app that prices custom audio and power cables in a few taps. Staff pick the two ends, the cable and the length, read out the **Metal** and **Plastic** prices, add cables to a cart, and **Approve** to send the item list to the accountant on WhatsApp.
+A phone app that prices custom audio and power cables in a few taps. Staff pick the two ends, the cable and the length, read out the **Neutrik**, **Generic metal** and **Generic plastic** prices, add cables to a cart, and **Approve** to send the item list to the accountant on WhatsApp.
+
+- **Loose cable** (no connectors): set End A and End B to **None**. Price = cable × length, no service charge.
+- **Loose connectors** (no cable): pick the connector(s) on End A (use the Y button for two), set End B to **None**, and choose **No cable** in the Cable dropdown. Price = connectors only, no service charge.
 
 All prices come from one Google Sheet that you control. Change the sheet and every phone updates.
 
@@ -14,6 +17,16 @@ All prices come from one Google Sheet that you control. Change the sheet and eve
 4. Do the same for the **Cables** tab with `public/data/cables.csv`, and for the **Settings** tab with `public/data/settings.csv`.
 5. In the **Settings** tab, type the accountant's WhatsApp number in the `value` cell next to `accountant_whatsapp`. Use digits only and start with the country code, for example `919822012345`.
    - If this is left blank, WhatsApp asks staff to choose a contact each time.
+
+### Already made the sheet before November 2026's update? Add two columns
+
+The app now has three price levels: **Neutrik**, **Generic metal** and **Generic plastic**. Your sheet keeps working as it is. To use Generic metal:
+
+1. In the **Connectors** tab, add two column headings in the next empty columns of row 1: `generic_metal_price` and `generic_metal_tally_name` (exactly as written, lower case).
+2. Fill in the generic metal price and Tally name for each connector that has one. Leave the rest empty.
+3. For **RCA**: move `290` from `metal_price` to `generic_metal_price` and `AMPHENOL ACPR` from `metal_tally_name` to `generic_metal_tally_name`, then clear the two `metal_` cells. Otherwise Amphenol RCA shows up as "Neutrik".
+
+The `metal_price` column is the **Neutrik** price. Its name stays the same so nothing breaks.
 
 ## 2. Publish each tab and connect it to the app
 
@@ -88,8 +101,10 @@ Add a new row at the bottom of the **Connectors** or **Cables** tab and fill in 
 | `id` | A short, unique code with no spaces, for example `mini_xlr`. Never change it once used. |
 | `label` | The name staff see in the dropdown. |
 | `group` (Connectors only) | `audio`, `power` or `data`. Power connectors show one price card instead of Metal and Plastic. |
-| `metal_price` / `plastic_price` | Price in ₹ **including GST**. Leave `plastic_price` empty if there is no plastic version. For power connectors, use `metal_price` only. |
-| `metal_tally_name` / `plastic_tally_name` | The item name exactly as it is in Tally. The accountant receives this name. |
+| `metal_price` | **Neutrik** price in ₹ **including GST**. Leave it empty if there is no Neutrik version. For power connectors this is the only price and must be filled in. |
+| `generic_metal_price` | **Generic metal** price (Amphenol or any other non-Neutrik metal connector), including GST. Empty = not available. |
+| `plastic_price` | **Generic plastic** price, including GST. Empty = not available. |
+| `metal_tally_name` / `generic_metal_tally_name` / `plastic_tally_name` | The item name exactly as it is in Tally, for each of the three prices. The accountant receives this name. Needed only where that price is filled in. |
 | `default_cable` (Connectors only) | The `id` of the cable chosen automatically for this connector. It must exist in the Cables tab. |
 | `roll_price_100m` (Cables only) | Price in ₹ including GST for a 100 m roll. |
 | `tally_name` (Cables only) | The cable's name in Tally. |
@@ -97,6 +112,8 @@ Add a new row at the bottom of the **Connectors** or **Cables** tab and fill in 
 | `sort` | Position in the dropdown. Lower numbers come first. |
 | `active` | `TRUE` to show it, `FALSE` to hide it without deleting it. |
 | `confirmed` | See step 7. |
+
+If any connector on a cable has no price for a tier, that tier shows "—" and can't be chosen. Every connector needs at least one price.
 
 The **Settings** tab also holds `service_charge_per_point` (₹ per soldered connector, before GST), `gst_rate` (as a decimal, for example `0.18`) and `business_name`.
 
@@ -108,7 +125,8 @@ These rows start as placeholders:
 
 - **Jack TRS (stereo):** the plastic price copies the mono jack (₹250).
 - **EP:** the plastic price uses the generic "EP connector" price (₹180).
-- **Speakon, RCA:** prices from the website. Metal RCA is Amphenol, because no Neutrik RCA is listed.
+- **Speakon, RCA:** prices from the website. RCA's metal version is Amphenol, so it is listed as **Generic metal** and has no Neutrik price.
+- **Generic metal prices:** none are filled in yet except RCA. Until you add them, the Generic metal row shows "—" for those connectors.
 - **Speakon 8-pole, EtherCON:** no plastic version. EtherCON uses a CAT cable that has no price yet.
 - **PowerCON (in/out):** default to the mic cable as a placeholder. Set the right cable.
 - **PowerCON TRUE1, Bals, Camlock:** use **Power cable (to be set)**, which costs ₹0 until you fill in its `roll_price_100m`.

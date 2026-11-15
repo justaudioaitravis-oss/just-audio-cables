@@ -44,3 +44,17 @@ One line each: decision — why.
 - Reopening the app restores the screen it was on (via history state); a screen with nothing to show (e.g. summary of an empty cart) falls back to the previous one.
 - Full reset unwinds browser history back to Build, so the back button can't return to a cleared order.
 - E2E tests run against a production build with fake sheet links (`.env.e2e` → https://sheet.test/…), intercepted by Playwright; WhatsApp is intercepted with a 204 so the page stays put.
+
+## Update requested by the owner (15 Nov 2026)
+- Three tiers replace Metal/Plastic: **Neutrik** (`metal_price`), **Generic metal** (new `generic_metal_price`), **Generic plastic** (`plastic_price`) — the existing `metal_price` column keeps its name so the live sheet doesn't break; the two new columns are optional and are treated as empty if missing.
+- `metal_price` may now be blank (no Neutrik version) except for power connectors; each connector needs at least one price; a Tally name is required only for tiers that have a price.
+- RCA moved to Generic metal (Amphenol ₹290) with no Neutrik price. No other generic metal prices are known yet — left blank for the owner to fill in, rather than guessed.
+- The single PRICE card (power / loose cable) uses the Neutrik price, falling back to generic metal for a connector that has no Neutrik price.
+- Internal tier ids stay `metal`/`plastic` (+ new `generic`), so carts saved on phones before the update keep working; only the labels changed.
+- Price cards became three full-width rows (label left, price right, radio-style check) — three side-by-side cards would squeeze long prices like ₹12,778 at phone width. Rows are 54 px; price figures 24 px.
+- Validation message "Pick Metal or Plastic" became "Pick a price".
+- Loose connectors: "No cable" is the last option in the Cable dropdown. It hides Length; price = connectors only; **no service charge** (nothing is soldered). Cart title e.g. `XLR Male + XLR Female (loose)`. Picking a connector afterwards re-applies the automatic cable, like any connector change.
+- "No cable" with both ends None has nothing to sell → "Pick a cable". The cable id `no_cable` is reserved in the sheet.
+- Loose cable (both ends None) already had no service charge — kept, now covered by a test.
+- Double-tap guard: for 350 ms after moving to another screen, that screen ignores taps (CSS `pointer-events: none`). Stops a double-tap on Review order from approving, on Approve from starting a New order, and on Proceed from landing on Review order. Not applied to in-place updates such as the cart steppers.
+- Custom length accepts plain decimals only (comma allowed as the decimal mark); "1e2", "-5" and "3m" are refused.
