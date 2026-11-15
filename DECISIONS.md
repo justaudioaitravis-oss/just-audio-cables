@@ -59,3 +59,5 @@ One line each: decision — why.
 - Double-tap guard: for 350 ms after moving to another screen, that screen ignores taps (CSS `pointer-events: none`). Stops a double-tap on Review order from approving, on Approve from starting a New order, and on Proceed from landing on Review order. Not applied to in-place updates such as the cart steppers.
 - Custom length accepts plain decimals only (comma allowed as the decimal mark); "1e2", "-5" and "3m" are refused.
 - Lengths above 50 m (owner request): 60, 70, 80, 90, 100 m, then Custom — same 10 m steps as 30→40→50; anything else via Custom (up to 500 m).
+- **Clear** button on the Build header (owner request): with an empty cart it clears every field at once (same blank screen as a fresh launch); with cables in the cart it asks "Clear this order?" (Keep / Clear), and Clear also empties the cart, so an old order can't follow the next customer. The question goes away if staff carry on editing instead.
+- On phones narrower than 381 px the Build header uses a 22 px logo and tighter spacing, so "Cable Calculator" and Clear fit without truncating.

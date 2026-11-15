@@ -36,7 +36,14 @@ export function createBuild(app: App): BuildView {
   const header = h(
     'header.bar',
     {},
-    h('div.bar-in', {}, logo, h('span.bar-divider', { 'aria-hidden': 'true' }), h('span.bar-sub', {}, 'Cable Calculator')),
+    h(
+      'div.bar-in',
+      {},
+      logo,
+      h('span.bar-divider', { 'aria-hidden': 'true' }),
+      h('span.bar-sub', {}, 'Cable Calculator'),
+      h('button.bar-clear', { type: 'button', onclick: () => onClear() }, 'Clear'),
+    ),
   );
 
   // ---------- fields ----------
@@ -167,13 +174,29 @@ export function createBuild(app: App): BuildView {
   const msg = h('p.msg', { role: 'alert', hidden: true });
   const proceed = h('button.btn.btn-primary.btn-block', { type: 'button' }, 'Proceed');
   proceed.addEventListener('click', onProceed);
-  const footer = h('footer.foot', {}, h('div.wrap', {}, msg, proceed));
+  const footWrap = h('div.wrap', {}, msg, proceed);
+  const footer = h('footer.foot', {}, footWrap);
+
+  /** Clear: instant when the cart is empty; asks first when cables are already in the cart. */
+  function onClear(): void {
+    if (app.order.cart.length === 0) return app.fullReset();
+    const keep = h('button.btn.btn-outline', { type: 'button' }, 'Keep');
+    const clear = h('button.btn.btn-danger', { type: 'button' }, 'Clear');
+    keep.addEventListener('click', hideConfirm);
+    clear.addEventListener('click', () => app.fullReset());
+    footWrap.replaceChildren(h('p.confirm', { role: 'alert' }, 'Clear this order?'), h('div.btn-pair', {}, keep, clear));
+  }
+
+  function hideConfirm(): void {
+    if (footWrap.firstChild !== msg) footWrap.replaceChildren(msg, proceed);
+  }
 
   const el = h('section.screen.screen-build', { 'data-screen': 'build' }, header, body, footer);
 
   // ---------- behaviour ----------
   function changed(structural: boolean): void {
     hideMsg();
+    hideConfirm();
     if (structural) sync();
     else syncLight();
     app.save();
@@ -234,6 +257,7 @@ export function createBuild(app: App): BuildView {
 
   /** Full sync of all controls (cheap enough to run on every structural change). */
   function sync(): void {
+    hideConfirm();
     const o = app.order;
     const b = o.build;
     if (customer.value !== o.customer) customer.value = o.customer;

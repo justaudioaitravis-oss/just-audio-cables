@@ -7,6 +7,7 @@ You are building a complete, finished app **autonomously**. The owner will start
 > - **Loose connectors:** the Cable dropdown ends with **No cable**. It hides Length and prices the connectors only, with **no service charge**. Loose cable (None → None) also has no service charge.
 > - Taps are ignored for 350 ms after a screen change (double-tap guard).
 > - Length dropdown continues after 50 m with 60, 70, 80, 90, 100 m, then Custom.
+> - The Build header has a small **Clear** button on the right: instant full reset when the cart is empty, "Clear this order?" Keep/Clear when it isn't.
 > - Details are in `DECISIONS.md` under "Update requested by the owner".
 
 ---

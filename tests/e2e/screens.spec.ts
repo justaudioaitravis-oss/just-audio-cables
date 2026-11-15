@@ -63,6 +63,12 @@ for (const size of sizes) {
       await shot(page, p('06-build-loose'));
       await page.getByRole('button', { name: 'Proceed' }).click();
       await shot(page, p('07-cart'));
+      await page.getByRole('button', { name: 'Back' }).click();
+      await page.waitForTimeout(400);
+      await page.getByRole('button', { name: 'Clear', exact: true }).click();
+      await shot(page, p('07b-build-clear-confirm'));
+      await page.getByRole('button', { name: 'Keep' }).click();
+      await page.goForward();
 
       await page.getByRole('button', { name: 'Review order' }).click();
       await shot(page, p('08-summary'));
@@ -100,6 +106,7 @@ for (const size of sizes) {
       await page.selectOption(sel.length, '20');
 
       await page.getByRole('button', { name: 'Back' }).count(); // no-op: Build has no back arrow
+
       await page.selectOption(sel.endA, 'xlr_m');
       await page.selectOption(sel.endB, 'xlr_f');
       await page.click(sel.metal);

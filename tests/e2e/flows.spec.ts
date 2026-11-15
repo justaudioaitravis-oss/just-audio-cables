@@ -511,3 +511,46 @@ test('length dropdown goes up to 100 m, then Custom', async ({ page }) => {
   // 445 + 512 + 7443 + 236
   await expect(page.locator(sel.metal)).toContainText('₹8,636');
 });
+
+test('Clear on Build with an empty cart clears every field at once', async ({ page }) => {
+  await open(page);
+  await page.fill(sel.customer, 'Old customer');
+  await page.fill(sel.phone, '12345');
+  await pick(page, 'xlr_m', 'xlr_f', 'custom');
+  await page.fill(sel.custom, '12');
+  await page.click(sel.yA);
+  await page.click(sel.metal);
+  await page.getByRole('button', { name: 'Clear' }).click();
+  await expectBlankBuild(page);
+  await page.reload();
+  await expectBlankBuild(page);
+});
+
+test('Clear on Build with cables in the cart asks first; Keep keeps, Clear resets everything', async ({ page }) => {
+  await open(page);
+  await page.fill(sel.customer, 'Ravi');
+  await pick(page, 'xlr_m', 'xlr_f', '10');
+  await page.click(sel.metal);
+  await page.getByRole('button', { name: 'Proceed' }).click();
+  await page.getByRole('button', { name: 'Back' }).click();
+  await page.waitForTimeout(400);
+  await page.getByRole('button', { name: 'Clear', exact: true }).click();
+  await expect(page.getByText('Clear this order?')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Proceed' })).toBeHidden();
+  await page.getByRole('button', { name: 'Keep' }).click();
+  await expect(page.locator(sel.customer)).toHaveValue('Ravi');
+  await expect(page.getByRole('button', { name: 'Proceed' })).toBeVisible();
+  // confirm disappears if staff carry on editing instead
+  await page.getByRole('button', { name: 'Clear', exact: true }).click();
+  await page.selectOption(sel.length, '5');
+  await expect(page.getByText('Clear this order?')).toBeHidden();
+  // now really clear
+  await page.getByRole('button', { name: 'Clear', exact: true }).click();
+  await page.locator('.foot .btn-danger').click();
+  await expectBlankBuild(page);
+  await page.click(sel.metal, { force: true });
+  await pick(page, 'xlr_m', 'xlr_f', '10');
+  await page.click(sel.metal);
+  await page.getByRole('button', { name: 'Proceed' }).click();
+  await expect(lines(page)).toHaveCount(1); // the old cable is gone
+});
