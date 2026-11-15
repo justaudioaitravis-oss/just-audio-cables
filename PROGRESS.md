@@ -1,31 +1,47 @@
 # Progress
 
-## Final report (15 Nov 2026)
+## Status at end of day (15 Nov 2026)
 
-**Status: complete.** All milestones M0–M11 are done, and every *Definition of done* item has been checked.
+**The app is live:** https://justaudioaitravis-oss.github.io/just-audio-cables/
+It's connected to the live Google Sheet (accountant WhatsApp set) and deploys automatically from the `main` branch on GitHub (`justaudioaitravis-oss/just-audio-cables`).
 
-**Verified**
-- `npm test`: 41 unit tests pass. They cover all 7 worked examples, the exact section 7.4 WhatsApp message, auto cable choice (slim for EP), Plastic disabled when a connector has no plastic price, cart merging, price lock, and sheet validation/caching.
-- `npm run test:e2e`: 27 browser tests pass at 390×844. They cover a simple cable, Y split, loose cable, power connector, merging, stepper to zero, Deny/Keep/Clear, the Approve message content, the blank screen after a reset and on first launch, back-button order, persistence, Settings long-press, sheet update via "Update now", rejection of invalid sheet data, offline launch, and the manifest.
-- `npm run build` produces a static `dist/`. It is also checked with a GitHub Pages sub-path build.
-- Lighthouse (mobile): Performance 100, Best practices 100, Accessibility 93. The only deduction is the deliberate `maximum-scale=1` (see DECISIONS.md).
-- Screenshots of every state at phone (390×844) and tablet (768×1024) sizes are in `screenshots/`. They were reviewed against sections 6 and 7, and the issues found were fixed (a CSS class clash on placeholders; the Y split mark was too faint).
+**Checks:** 57 unit tests and 37 browser tests pass; the build is clean; the live site was checked in a phone-sized browser (prices, sheet download, offline cache, no errors). Lighthouse (mobile): Performance 100, Best practices 100, Accessibility 93. The 93 is the deliberate zoom lock, see DECISIONS.md.
 
-**What you need to do next** (README.md has step-by-step instructions)
-1. Create the Google Sheet from `public/data/*.csv` and fill in `accountant_whatsapp`.
-2. Publish the three tabs as CSV and paste the links into `src/config.ts`.
-3. Put the app online with GitHub Pages (workflow included) or Netlify drag-and-drop.
-4. Install the app on staff phones.
-5. Check the 22 placeholder rows marked `confirmed = FALSE` (listed in the app under Settings → Needs checking). The power and CAT cables are priced at ₹0 until you set them.
+### What changed after the first build
+1. **Went live:** the sheet links went into `src/config.ts`, the app was pushed to GitHub, and it was deployed with GitHub Pages.
+2. **Stress test on the live app**, done like a real user. Fixed:
+   - A double-tap on *Review order* could send the order to WhatsApp before anyone reviewed it.
+   - A double-tap on *Approve* could wipe the order straight after sending.
+   - Fix: each new screen ignores taps for 0.35 s.
+   - Custom length now refuses entries like "1e2".
+3. **Three price levels:** Neutrik / Generic metal / Generic plastic, shown as three rows.
+   - `metal_price` = Neutrik (column name kept so the sheet didn't break).
+   - New optional columns: `generic_metal_price`, `generic_metal_tally_name`.
+   - RCA (Amphenol ₹290) is now Generic metal in the built-in data.
+4. **Loose connectors:** choose **No cable** in the Cable list. Length hides, and the price is the connectors only, with **no service charge**. Loose cable (None → None) also has no service charge.
+5. **Lengths up to 100 m:** … 50, 60, 70, 80, 90, 100 m, then Custom.
+6. **Clear button** (top right of the first screen):
+   - Cart empty: clears all fields instantly.
+   - Cables in the cart: asks "Clear this order?" (Keep / Clear).
+   - The header fits on 360 px phones.
+
+### Still to do (owner)
+1. **Update the Connectors tab for Generic metal.** The easiest way: File → Import → Upload `~/Desktop/connectors-updated.csv` → *Replace current sheet*. The file is your live data plus the two new columns, with RCA moved. Until this is done, Amphenol RCA shows under "Neutrik". Alternatively, connect Google Drive (`/mcp` → claude.ai Google Drive) so Claude can edit the sheet directly.
+2. **Fill in Generic metal prices and Tally names** for the connectors that have a non-Neutrik metal version. Only RCA has one so far.
+3. **Clear the 22 "Needs checking" rows** (Settings → Needs checking). The power cable and CAT cable cost ₹0 until set.
+4. **Install on staff phones** (Chrome ⋮ → Add to Home screen; Safari Share → Add to Home Screen), then do one test order to confirm the WhatsApp message reaches the accountant.
+5. **Optional:** after big price changes, ask for the built-in prices (`public/data/`) to be refreshed. Phones that lose their saved data while offline fall back to them.
+
+### Notes on safety and upkeep
+- Anyone with the app link can see retail prices; the sheet links and accountant number are public. Keep cost prices and margins out of this spreadsheet.
+- Turn on 2-step verification for the Google and GitHub accounts. They control prices and the app.
+- If prices look wrong, check Settings (hold the logo for 1 s): "Prices updated" should be recent and "Last error" empty.
 
 Every assumption is listed in `DECISIONS.md`.
 
-## Update (15 Nov 2026, after launch)
-- [x] Live stress test. Found: a double-tap on Review order could send an unreviewed order, and a double-tap on Approve could wipe the order. Both fixed with a tap guard and covered by e2e tests.
-- [x] Three tiers: Neutrik / Generic metal / Generic plastic. The sheet is backward compatible; two optional new columns (see README).
-- [x] Loose connectors ("No cable"), with no service charge. Loose cable also has no service charge (already the case, now tested).
-- [x] Custom length refuses "1e2" and similar.
-- Owner to do: add the two generic metal columns to the live sheet and move RCA's Amphenol price into them (README, step 1).
+## First build report (15 Nov 2026)
+
+All milestones M0–M11 were done and every *Definition of done* item was checked. That included the 7 worked examples, the exact WhatsApp message, every e2e flow in M9, offline launch, a sheet update via "Update now" with invalid data rejected, screenshots of every state at 390×844 and 768×1024, and the owner README with a GitHub Pages workflow.
 
 ## Milestones
 - [x] **M0 Setup:** Vite + TS project, lint, Vitest, Playwright, git init, PROGRESS.md, DECISIONS.md

@@ -3,6 +3,7 @@
 A phone app that prices custom audio and power cables in a few taps. Staff pick the two ends, the cable and the length, read out the **Neutrik**, **Generic metal** and **Generic plastic** prices, add cables to a cart, and **Approve** to send the item list to the accountant on WhatsApp.
 
 - **Loose cable** (no connectors): set End A and End B to **None**. Price = cable × length, no service charge.
+- **Clear** (top right of the first screen) wipes the fields to start fresh. If cables are already in the cart, it asks first.
 - **Loose connectors** (no cable): pick the connector(s) on End A (use the Y button for two), set End B to **None**, and choose **No cable** in the Cable dropdown. Price = connectors only, no service charge.
 
 All prices come from one Google Sheet that you control. Change the sheet and every phone updates.
